@@ -60,6 +60,39 @@ group by o.category, o.product
 ) as subquery1
 where pdrs <=2
 ;
+
+-- Find top category and product that has least spend amount 
+
 select * from orders1;
+
+with top_category as 
+(
+select * from
+(
+select category, sum(spend) as total_spend_category
+, dense_rank() over(order by sum(spend) desc ) as drc
+from orders1
+group by category
+) as subquery
+where drc =1
+)
+select * from (
+select o.product, o.category, sum(o.spend) as total_spend_product
+, dense_rank() over(partition by o.category order by sum(o.spend)) as pdrn
+from orders1 o 
+join top_category as tc
+on tc.category = o.category
+group by o.product,o.category
+) as subquery1
+where pdrn =1
+;
+
+
+
+
+
+
+
+
 
 
